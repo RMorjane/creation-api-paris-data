@@ -68,8 +68,8 @@ class ParisDataScraper:
         for loop_links in self.links:
             print('theme link : ',loop_links)
             self.driver.get(loop_links)
-            time.sleep(5)
-            soup = BeautifulSoup(self.driver.page_source, 'lxml')
+            time.sleep(1)
+            soup = BeautifulSoup(self.driver.page_source,'lxml')
             
             for loop_item in soup.find_all('div',{'class': 'ods-catalog-card'}):
                 
@@ -81,10 +81,10 @@ class ParisDataScraper:
                 
                 modified_item = get_timestamp(loop_item.find('span',{'class': 'ng-binding ng-scope'}).text)
                 print('modified item : ',modified_item)
-                
+            
                 list_metadata = [loop_metadata.text for loop_metadata in loop_item.find_all('span',
                 {'class': 'ods-catalog-card__metadata-item-value-text ng-binding ng-scope'})]
-                print('producer item : ',list_metadata[0])
+                print('producer item : ',list_metadata[0].replace('.',''))
                 print('license item : ',list_metadata[1])
                 print('keyword item : ',list_metadata[2])
                 
