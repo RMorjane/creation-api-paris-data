@@ -84,7 +84,7 @@ class ParisDataScraper:
             
                 list_metadata = [loop_metadata.text for loop_metadata in loop_item.find_all('span',
                 {'class': 'ods-catalog-card__metadata-item-value-text ng-binding ng-scope'})]
-                print('producer item : ',list_metadata[0].replace('.',''))
+                print('producer item : ',list_metadata[0])
                 print('license item : ',list_metadata[1])
                 print('keyword item : ',list_metadata[2])
                 
