@@ -1,5 +1,4 @@
 import dotenv
-import dotenv
 import psycopg2
 
 dotenv.load_dotenv()
@@ -25,14 +24,13 @@ class DBParisData:
         
     def create_tables(self):
         try:
-            with self.connection.cursor() as my_cursor:
+            with self.connection.cursor() as tables_cursor:
                 sql_create_tables = """
                 CREATE TABLE IF NOT EXISTS theme(
                     theme_id SERIAL,
                     theme_name VARCHAR(50),
                     theme_link VARCHAR(200)
-                );
-                
+                );                
                 CREATE TABLE IF NOT EXISTS dataset(
                     dataset_id SERIAL,
                     theme_id INT,
@@ -43,8 +41,7 @@ class DBParisData:
                     dataset_license VARCHAR(50),
                     dataset_records_count INT,
                     dataset_api_link VARCHAR(200)
-                );
-                
+                );                
                 CREATE TABLE IF NOT EXISTS record(
                     record_id SERIAL,
                     dataset_id INT,
@@ -59,29 +56,93 @@ class DBParisData:
                     record_numero_dossier VARCHAR(10),
                     record_numero_siret VARCHAR(14),
                     record_montant_vote INT
-                );
-                
+                );                
                 CREATE TABLE IF NOT EXISTS keyword(
                     keyword_id SERIAL,
                     keyword_name VARCHAR(50)
-                );
-                
+                );                
                 CREATE TABLE IF NOT EXISTS dataset_keyword(
                     dataset_id INT,
                     keyword_id INT,
                     PRIMARY KEY(dataset_id,keyword_id)
-                );"""
-                my_cursor.execute(sql_create_tables)
+                );
+                """
+                tables_cursor.execute(sql_create_tables)
                 self.connection.commit()
-                my_cursor.close()
+                tables_cursor.close()
             print("Création des tables réussie")
             return True
         except (Exception, psycopg2.Error) as error:
-            print(
-                "Impossible de créer les tables au niveau du serveur postgres : " + str(error))
+            print("Impossible de créer les tables au niveau du serveur postgres : " + str(error))
             self.connection.close()
             return False
         
-db = DBParisData()
-db.connect()
-db.create_tables()
+    def save_list_themes(self,list_themes: list):
+        with self.connection.cursor() as theme_cursor:
+            sql_save_themes = "INSERT INTO theme(theme_name,theme_link) VALUES(%s,%s)"
+            for loop_theme in list_themes:
+                theme_cursor.execute(sql_save_themes,
+                    (loop_theme['theme_name'],
+                     loop_theme['theme_link']))
+            self.connection.commit()
+            theme_cursor.close()
+            
+    def save_list_dataset(self,list_dataset: list):
+        with self.connection.cursor() as dataset_cursor:
+            sql_save_dataset = """INSERT INTO dataset(theme_id,dataset_title,dataset_desc,
+            dataset_modified,dataset_producer,dataset_license,dataset_records_count,dataset_api_link)
+            VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"""
+            for loop_dataset in list_dataset:
+                dataset_cursor.execute(sql_save_dataset,
+                    (loop_dataset['theme_id'],
+                     loop_dataset['dataset_title'],
+                     loop_dataset['dataset_desc'],
+                     loop_dataset['dataset_modified'],
+                     loop_dataset['dataset_producer'],
+                     loop_dataset['dataset_license'],
+                     loop_dataset['dataset_records_count'],
+                     loop_dataset['dataset_api_link']))
+            self.connection.commit()
+            dataset_cursor.close()
+            
+    def save_list_records(self,list_records: list):
+        with self.connection.cursor() as record_cursor:
+            sql_save_record = """INSERT INTO record(dataset_id,record_timestamp,record_direction,
+            record_objet_dossier,record_nature_subvention,record_collectivite,record_secteurs_activite,
+            record_annee_budgetaire,record_nom_beneficiaire,record_numero_dossier,record_numero_siret,
+            record_montant_vote) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """
+            for loop_record in list_records:
+                record_cursor.execute(sql_save_record,
+                    (loop_record['dataset_id'],
+                     loop_record['record_timestamp'],
+                     loop_record['record_direction'],
+                     loop_record['record_objet_dossier'],
+                     loop_record['record_nature_subvention'],
+                     loop_record['record_collectivite'],
+                     loop_record['record_secteurs_activite'],
+                     loop_record['record_annee_budgetaire'],
+                     loop_record['record_nom_beneficiaire'],
+                     loop_record['record_numero_dossier'],
+                     loop_record['record_numero_siret'],
+                     loop_record['record_montant_vote']))
+            self.connection.commit()
+            record_cursor.close()
+            
+    def save_list_keywords(self,list_keywords: list):
+        with self.connection.cursor() as keyword_cursor:
+            sql_save_keywords = "INSERT INTO keyword(keyword_name) VALUES(%s)"
+            for loop_keyword in list_keywords:
+                keyword_cursor.execute(sql_save_keywords,(loop_keyword,))
+            self.connection.commit()
+            keyword_cursor.close()
+            
+    def save_list_dataset_keywords(self,list_dataset_keywords: list):
+        with self.connection.cursor() as dataset_keyword_cursor:
+            sql_save_dataset_keywords = "INSERT INTO dataset_keyword(dataset_id,keyword_id) VALUES(%s,%s)"
+            for loop_dataset_keyword in list_dataset_keywords:
+                dataset_keyword_cursor.execute(sql_save_dataset_keywords,
+                    (loop_dataset_keyword['dataset_id'],
+                     loop_dataset_keyword['keyword_id']))
+            self.connection.commit()
+            dataset_keyword_cursor.close()
