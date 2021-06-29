@@ -1,4 +1,5 @@
 .env
+logs.txt
 commandes.txt
 .vscode/
 __pycache__/
