@@ -1,3 +1,4 @@
+from urllib.parse import urlencode
 import dotenv
 import psycopg2
 
@@ -190,11 +191,10 @@ class DBParisData:
             for loop_data in data_cursor.fetchall():
                 self.list_data.append(
                     {
-                        loop_field: loop_data[self.list_fields[data].index(loop_field)] 
+                        loop_field: loop_data[self.list_fields[data].index(loop_field)]
                         for loop_field in self.list_fields[data]
-                    }
-                )
-                
+                   }
+                )  
             data_cursor.close()
             
     def find_dataset_keywords(self, list_keywords: list):
