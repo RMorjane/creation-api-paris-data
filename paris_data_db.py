@@ -7,6 +7,22 @@ class DBParisData:
     
     def __init__(self):
         self.connection = None
+        self.list_data = []
+        self.list_fields = {
+            "theme": ["theme_id","theme_name","theme_link"],
+            
+            "dataset": ["dataset_id","theme_id","dataset_title","dataset_desc","dataset_modified",
+                        "dataset_producer","dataset_license","dataset_records_count","dataset_api_link"],
+            
+            "record": ["record_id","dataset_id","record_timestamp","record_direction",
+                       "record_objet_dossier","record_nature_subvention","record_collectivite",
+                       "record_secteurs_activite","record_annee_budgetaire","record_nom_beneficiaire",
+                       "record_numero_dossier","record_numero_siret","record_montant_vote"],
+            
+            "keyword": ["keyword_id","keyword_name"],
+            
+            "dataset_keyword": ["dataset_id","keyword_id"]
+        }
         
     def connect(self):
         try:
@@ -146,3 +162,79 @@ class DBParisData:
                      loop_dataset_keyword['keyword_id']))
             self.connection.commit()
             dataset_keyword_cursor.close()
+            
+    def find_data(self,data: str, conditions: dict={}):
+        list_keys = []
+        list_values = []
+        list_args = ()
+        
+        for key,value in conditions.items():
+            list_keys.append(key)
+            list_values.append(value)
+        
+        with self.connection.cursor() as data_cursor:
+            sql_list_data = "SELECT * FROM " + data
+            for i in range(len(list_keys)):
+                if i==0:
+                    sql_list_data += " WHERE "
+                else:
+                    sql_list_data += " AND "
+                if type(list_values[i])==int:
+                    sql_list_data += list_keys[i] + "=%s"
+                elif type(list_values[i])==str:
+                    sql_list_data += list_keys[i] + "='%s'"
+                list_args = (list_args + (list_values[i],))
+                
+            data_cursor.execute(sql_list_data % (list_args))
+            self.list_data = []
+            for loop_data in data_cursor.fetchall():
+                self.list_data.append(
+                    {
+                        loop_field: loop_data[self.list_fields[data].index(loop_field)] 
+                        for loop_field in self.list_fields[data]
+                    }
+                )
+                
+            data_cursor.close()
+            
+    def find_dataset_keywords(self, list_keywords: list):
+       with self.connection.cursor() as dk_cursor:
+            sql_list_dk = """
+            SELECT
+                theme_id,
+                dataset_keyword.dataset_id,
+                dataset_title,
+                dataset_desc,
+                dataset_modified,
+                dataset_producer,
+                dataset_license,
+                dataset_records_count,
+                dataset_api_link
+            FROM
+                dataset,
+                keyword,
+                dataset_keyword
+            WHERE
+                dataset_keyword.dataset_id = dataset.dataset_id
+            AND
+                dataset_keyword.keyword_id = keyword.keyword_id
+            AND
+                keyword_name IN (
+            """
+            for i in range(len(list_keywords)):
+                sql_list_dk += "'"+list_keywords[i]+"'"
+                if i < len(list_keywords) - 1:
+                    sql_list_dk += ","
+                else:
+                    sql_list_dk += ")"
+            dk_cursor.execute(sql_list_dk)
+            self.list_data = []
+            
+            for loop_data in dk_cursor.fetchall():
+                self.list_data.append(
+                    {
+                        loop_field: loop_data[self.list_fields["dataset"].index(loop_field)] 
+                        for loop_field in self.list_fields["dataset"]
+                    }
+                )
+            dk_cursor.close()                
