@@ -1,6 +1,4 @@
-from base64 import encode
 import logging
-from pprint import pprint
 from paris_data_api import ParisDataApi
 from flask import Flask, render_template, request, jsonify
 

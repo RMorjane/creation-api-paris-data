@@ -1,4 +1,3 @@
-from urllib.parse import urlencode
 import dotenv
 import psycopg2
 
