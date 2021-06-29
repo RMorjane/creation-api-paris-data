@@ -1,22 +1,21 @@
 from pprint import pprint
-from paris_data_db import DBParisData
-from paris_data_scraper import ParisDataScraper
-
+from paris_data_api import ParisDataApi
+    
 if __name__ == '__main__':
-    scraper = ParisDataScraper()
-    scraper.load_driver()
-    scraper.read_themes()
-    scraper.read_dataset()
-    scraper.read_keywords()
-    #scraper.read_records()
-    pprint(scraper.list_dataset_keywords)
-    db = DBParisData()
-    db.connect()
-    #db.save_list_themes(scraper.list_themes)
-    #db.save_list_dataset(scraper.list_dataset)
-    #db.save_list_records(scraper.list_records)
-    #db.save_list_keywords(scraper.list_keywords)
-    db.save_list_dataset_keywords(scraper.list_dataset_keywords)
-    db.connection.close()
-    scraper.driver.close()
-    scraper.display.stop()
+    
+    api = ParisDataApi()
+    
+    api.read_list_themes()
+    pprint(api.list_themes)
+    
+    api.read_list_dataset()
+    pprint(api.list_dataset)
+    
+    api.read_list_records()
+    pprint(api.list_records)
+    
+    api.read_list_keywords()
+    pprint(api.list_keywords)
+    
+    api.read_dataset_keywords(["loisirs"])
+    pprint(api.list_dataset_keywords)
