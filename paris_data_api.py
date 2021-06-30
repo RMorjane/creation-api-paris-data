@@ -1,4 +1,3 @@
-from pprint import pprint
 from paris_data_db import DBParisData
 
 class ParisDataApi:
