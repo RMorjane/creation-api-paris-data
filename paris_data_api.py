@@ -9,6 +9,7 @@ class ParisDataApi:
         self.list_keywords = []
         self.list_records = []
         self.list_dataset_keywords = []
+        self.list_dataset_theme = []
         
     def read_list_themes(self):
         if not self.db.connection: self.db.connect()
@@ -34,3 +35,8 @@ class ParisDataApi:
         if not self.db.connection: self.db.connect()
         self.db.find_dataset_keywords(list_keywords)
         self.list_dataset_keywords = self.db.list_data
+        
+    def read_dataset_theme(self, theme: str):
+        if not self.db.connection: self.db.connect()
+        self.db.find_dataset_theme(theme)
+        self.list_dataset_theme = self.db.list_data

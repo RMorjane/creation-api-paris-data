@@ -9,7 +9,8 @@ from selenium.webdriver.chrome.options import Options
 
 dict_months = {'janvier': 1, 'février': 2, 'mars': 3, 'avril': 4, 'mai': 5, 'juin': 6,
 'juillet': 7, 'août': 8, 'septembre': 9, 'octobre': 10, 'novembre': 11, 'décembre': 12}
-        
+
+# fonction utilitaire permettant d'instancier le driver chrome       
 def get_chrome_driver():
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -22,6 +23,7 @@ def get_chrome_driver():
     driver = webdriver.Chrome(options=chrome_options)
     return driver
 
+# fonction utilitaire permettant de formatter une date à partir d'une chaine de caractère
 def get_timestamp(str_date):
     raw_date = str_date.split(' ')
     raw_time = raw_date[3].split(':')
@@ -33,22 +35,25 @@ def get_timestamp(str_date):
     d = datetime(year,month,day,hours,minutes)
     return d
 
+# classe permettant d'aspirer les données du site paris data
 class ParisDataScraper:
     
     def __init__(self):
         self.display = Display(visible=0, size=(1920, 1080))
         self.driver = None
         self.url = 'https://opendata.paris.fr'
-        self.list_themes = []
-        self.list_dataset = []
-        self.list_records = []
-        self.list_keywords = []
-        self.list_dataset_keywords = []
-        
+        self.list_themes = [] # liste des themes
+        self.list_dataset = [] # liste des jeux ce données
+        self.list_records = [] # liste des enregistrements
+        self.list_keywords = [] # liste des mots clés
+        self.list_dataset_keywords = [] # liste des mots clés par jeux de données
+
+    # méthode de la classe permettant de charger le driver chrome        
     def load_driver(self):
         self.display.start()
         self.driver = get_chrome_driver()
-            
+
+    # méthode permettant de lister tous les themes du site           
     def read_themes(self):
         self.driver.get(self.url+'/page/home/')
         soup = BeautifulSoup(self.driver.page_source,'lxml')
@@ -59,7 +64,8 @@ class ParisDataScraper:
             }
             for loop_link in soup.find_all('a',{'class': 'box-theme'})
         ]
-         
+
+    # méthode permettant de lister tous les jeux de données du site         
     def read_dataset(self):
         i = 0
         for loop_theme in self.list_themes:
@@ -107,6 +113,7 @@ class ParisDataScraper:
                     }
                 )
     
+    # récupération de l'api correspondant à l'url du jeux de données
     def get_dataset_api(self,dataset_api_link: str):
         try:
             self.driver.get(dataset_api_link)
@@ -123,7 +130,8 @@ class ParisDataScraper:
                 return {}
         except:
             return {}
-                                      
+    
+    # méthode de la classe permettant de lister tous les enregistrements des jeux de données du site                              
     def read_records(self):
         i = 0
         for loop_dataset in self.list_dataset:
@@ -149,7 +157,8 @@ class ParisDataScraper:
                                 "record_montant_vote": loop_record['fields'].get('montant_vote',0)
                             }
                         )
-                        
+    
+    # méthode de la classe permettant de lister tous les mots clés du site                   
     def read_keywords(self):
         i = 0
         for loop_dataset in self.list_dataset:

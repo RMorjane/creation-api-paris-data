@@ -31,10 +31,15 @@ def keywords():
     api.read_list_keywords()
     return jsonify(api.list_keywords)
 
-@app.route("/dataset_keywords/<keywords>", methods=['GET'])
+@app.route("/dataset/keywords/<keywords>", methods=['GET'])
 def dataset_keywords(keywords: str):
     api.read_dataset_keywords(keywords.split(','))
     return jsonify(api.list_dataset_keywords)
+
+@app.route("/dataset/theme/<theme>", methods=['GET'])
+def dataset_theme(theme: str):
+    api.read_dataset_theme(theme)
+    return jsonify(api.list_dataset_theme)
     
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=3000, debug=True)

@@ -236,4 +236,21 @@ class DBParisData:
                         for loop_field in self.list_fields["dataset"]
                     }
                 )
-            dk_cursor.close()                
+            dk_cursor.close()
+            
+    def find_dataset_theme(self, theme: str):
+           with self.connection.cursor() as dt_cursor:
+            sql_list_dt ="""
+            SELECT * FROM dataset 
+            WHERE theme_id IN (SELECT theme_id FROM theme WHERE theme_name='%s')"""
+            dt_cursor.execute(sql_list_dt % (theme,))
+            self.list_data = []
+            
+            for loop_data in dt_cursor.fetchall():
+                self.list_data.append(
+                    {
+                        loop_field: loop_data[self.list_fields["dataset"].index(loop_field)] 
+                        for loop_field in self.list_fields["dataset"]
+                    }
+                )
+            dt_cursor.close()               
